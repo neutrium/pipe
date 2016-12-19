@@ -1,4 +1,3 @@
-import { Utils } from './utilities'
 import { Pipe } from './Pipe'
 
 
