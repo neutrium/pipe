@@ -28,7 +28,7 @@ This module is built with the declaration files so type hinting should work once
 
 #### Browsers
 
-The Pipe module is currently a commonjs (node) package. To use it in a browser environment you will need to use a tool like [browserify](http://browserify.org) to convert it to a web bunble and expose the Pipe object.
+The Pipe module is currently a commonjs (node) package. To use it in a browser environment you will need to use a tool like [browserify](http://browserify.org) to convert it to a web bundle and expose the Pipe object.
 
 ## Usage
 
@@ -45,7 +45,7 @@ Alternatively you can specify the outer diameter and wall thickness using string
 
 	let pipe = new Pipe("100mm", "6mm");
 
-The pipe object will maintain unit consisteny and where applicable will return all attributes in the units you specified for outer diameter.
+The pipe object will maintain unit consistency and where applicable will return all attributes in the units you specified for outer diameter.
 
 #### Usage
 
@@ -57,11 +57,11 @@ Once the pipe object has been created you can access its attributes directly:
 	pipe.icsa 	// The pipe internal cross sectional area
 	pipe.ecsa 	// The pipe external cross sectional area
 
-Each of these attributes are Quanitiy objects and can be readily converted to the desired unit using the `to()` method, by default the quantities will have the units specified for od and wt in the constructor. No special checking is performed to ensure unit consistency and therefore od and wall thickness could be returned in different units at the users disgression.
+Each of these attributes are Quantity objects and can be readily converted to the desired unit using the `to()` method, by default the quantities will have the units specified for od and wt in the constructor. No special checking is performed to ensure unit consistency and therefore od and wall thickness could be returned in different units at the users digression.
 
 The underlying scalar value of the quantity can be accessed using `pipe.od.scalar` which returns a [@neutrium/math](https://github.com/neutrium/math) Decimal or as a plain old javascript numbers using `pipe.od.scalar.toNumber()`.
 
-If you are performing caculations that require maximum performance (e.g. iterative hydraulics) to can obtain the a plain javascript object containing the pipe attributes:
+If you are performing calculations that require maximum performance (e.g. iterative hydraulics) to can obtain the a plain javascript object containing the pipe attributes:
 
 	let raw = pipe.raw();
 
