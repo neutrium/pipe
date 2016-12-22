@@ -1,68 +1,39 @@
-import { typeguards } from "@neutrium/utilities";
 import { Quantity } from '@neutrium/quantity'
 
-
-let isNumber = typeguards.isNumber;
 
 // Should this be an interface or a superclass -> could mean move utilities back into here (probably better to be an abstract class)
 // Maybe not even make it abstract and use it as the general user defined pipe and the subclasses allow constructors with specific pipe parameters like DN and Sch
 export class Pipe
 {
     // Make these private and have external getters
-    public readonly id      : number;   // The inner diameter (m)
-    public readonly od      : number;   // The outer diameter (m)
-    public readonly wt      : number;   // The wall thickness (m)
-    public readonly icsa    : number;   // The internal cross sectional area (m^2)
-    public readonly ecsa    : number;   // The external cross sectional area (m^2)
-    private unit   : string;   // The preferred length unit to output as e.g. m, mm, in, ft (Any unit supported by Neutrium.Quanity)
-
-
+    public readonly id      : Quantity; // The inner diameter (m)
+    public readonly od      : Quantity; // The outer diameter (m)
+    public readonly wt      : Quantity; // The wall thickness (m)
+    public readonly icsa    : Quantity; // The internal cross sectional area (m^2)
+    public readonly ecsa    : Quantity;	// The external cross sectional area (m^2)
 
     // @param {number | Quantity} od - The outer diameter
     // @param {number | Quantity} wt - The pipe wall thickness
-    // @param {string?} unit - The unit to output results as (Default = metres)
-    constructor(od: number | Quantity, wt : number | Quantity, unit : string = 'm')
+    constructor(od: string | Quantity, wt : number | Quantity)
     {
-        this.unit = unit;
-
-        if(typeguards.isNumber(od))
-        {
-            this.od = od;
-        }
-        else if(od instanceof Quantity)
-        {
-            this.od = od.to('m').scalar.toNumber();
-        }
-        else
-        {
-            // Complain
-        }
-        
-        if(typeguards.isNumber(wt))
-        {
-            this.wt = wt;
-        }
-        else if(wt instanceof Quantity)
-        {
-            this.wt = wt.to('m').scalar.toNumber();
-        }
-        else
-        {
-            // Complain
-        }
+		this.od = new Quantity(od);
+		this.wt = new Quantity(wt);
 
         // Calculate the rest of the properties
-        this.id = this.od - 2*this.wt;
-        this.icsa = Math.PI * (this.id * this.id)/4;
-        this.ecsa = Math.PI * (this.od * this.od)/4;
+        this.id = this.od.sub(this.wt.mul(2));
+		this.icsa = this.id.mul(this.id).mul(Math.PI/4);
+        this.ecsa = this.od.mul(this.od).mul(Math.PI/4);
     }
 
-    public raw()
+    public raw(unit?: string)
     {
+		let units = unit || this.od.units();
+
         return {
-            "id": this.id,
-            "od": this.od,
-            "icsa": this.icsa
+            "id": this.id.to(units).scalar.toNumber(),
+            "od": this.id.to(units).scalar.toNumber(),
+			"wt": this.wt.to(units).scalar.toNumber(),
+            "icsa": this.icsa.to(units).scalar.toNumber()
         };
     }
 }

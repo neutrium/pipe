@@ -1,5 +1,8 @@
 import { Pipe } from './Pipe'
+import { Quantity } from '@neutrium/quantity';
+import { typeguards } from "@neutrium/utilities";
 
+let isNumber = typeguards.isNumber;
 
 export class SchedulePipe extends Pipe
 {
@@ -41,59 +44,71 @@ export class SchedulePipe extends Pipe
         "900": {"10": 0.0079248, "20": 0.0127, "30": 0.015875, "40": 0.01905, "STD": 0.009525, "XS": 0.0127, "40S": 0.009525, "80S": 0.0127}
     }
 
-
-
-
     public readonly schedule: string;
-    public readonly isNPS: boolean;
+	public readonly dn: number;
+	public readonly nps: number;
 
     // @param {string} ns - The nominal size of the pipe (NPS vs DN ?)
     // @param {string} schedule - The pipe schdule
     // @param {boolean?} isImperial - Whether to use Imperial (NPS) or metric (DN) nominal size (Default false) - Could use a regex for DN or look for "
-    constructor(size : number, schedule : string, isNPS : boolean = false)
+    constructor(size : string | Quantity, schedule : string)
     {
-        //SchedulePipe.WT_DATA
-        let sizeIndex = isNPS ? 1 : 0,
-            dn = null,
+        let sizeQty = new Quantity(size),
+			units = sizeQty.units() || "m",
+			sizeData : any = null,
             od = null,
             wt = null;
 
+		let nomSize : number,
+			nomSizeIndex = 0;
+
+		if(units == "in")
+		{
+			nomSize = sizeQty.scalar.toNumber();
+			nomSizeIndex = 1
+		}
+		else
+		{
+			nomSize = sizeQty.to("mm").scalar.toNumber();
+		}
+
         // Get the DN size and outer diameter
-        for (let i = 0, len = SchedulePipe.OD_DATA.length; i < len; i++) 
+        for (let i = 0, len = SchedulePipe.OD_DATA.length; i < len; i++)
         {
             let element = SchedulePipe.OD_DATA[i];
 
-            if(element[sizeIndex] == size)
+            if(element[nomSizeIndex] == nomSize)
             {
-                dn = element[0];
-                od = element[2];
+				sizeData = element;
+                od = new Quantity(element[2], "m").to(units);
                 break;
             }
         }
 
         // Check a valid size was provided
-        if(dn === null || od === null)
+        if(od === null)
         {
-            console.log(dn);
-            // Throw error - incorrect size provided
+            throw Error("Invalid pipe size provided");
         }
 
         // Get the wall thickness
-        let pipeData = SchedulePipe.WT_DATA[""+dn];
+        let pipeData = SchedulePipe.WT_DATA["" + sizeData[0]];
 
         if(pipeData.hasOwnProperty(schedule))
         {
-            wt = pipeData[schedule];
+            wt = new Quantity(pipeData[schedule], "m").to(units);
         }
         else
         {
-            // Throw error - incorrect schedule provided
+            throw Error("Invalid combination of pipe size and schedule provided");
         }
 
+		// od and wt are in metres at this point
         super(od, wt);
 
         // Set additional Schedule pipe info
         this.schedule = schedule;
-        this.isNPS = isNPS;
+		this.dn = sizeData[0];
+		this.nps = sizeData[1];
     }
 }

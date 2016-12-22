@@ -1,15 +1,15 @@
 import { Quantity } from '@neutrium/quantity';
 export declare class Pipe {
-    readonly id: number;
-    readonly od: number;
-    readonly wt: number;
-    readonly icsa: number;
-    readonly ecsa: number;
-    private unit;
-    constructor(od: number | Quantity, wt: number | Quantity, unit?: string);
-    raw(): {
-        "id": number;
-        "od": number;
-        "icsa": number;
+    readonly id: Quantity;
+    readonly od: Quantity;
+    readonly wt: Quantity;
+    readonly icsa: Quantity;
+    readonly ecsa: Quantity;
+    constructor(od: string | Quantity, wt: number | Quantity);
+    raw(unit?: string): {
+        "id": any;
+        "od": any;
+        "wt": any;
+        "icsa": any;
     };
 }

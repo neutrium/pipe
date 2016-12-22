@@ -1,4 +1,5 @@
 import { Pipe } from './Pipe';
+import { Quantity } from '@neutrium/quantity';
 export declare class SchedulePipe extends Pipe {
     static readonly OD_DATA: number[][];
     static readonly WT_DATA: {
@@ -461,6 +462,7 @@ export declare class SchedulePipe extends Pipe {
         };
     };
     readonly schedule: string;
-    readonly isNPS: boolean;
-    constructor(size: number, schedule: string, isNPS?: boolean);
+    readonly dn: number;
+    readonly nps: number;
+    constructor(size: string | Quantity, schedule: string);
 }
