@@ -15,11 +15,13 @@ var Pipe = (function () {
     }
     Pipe.prototype.raw = function (unit) {
         var units = unit || this.od.units();
+        console.log(this.ecsa.scalar.valueOf());
         return {
             "id": this.id.to(units).scalar.toNumber(),
-            "od": this.id.to(units).scalar.toNumber(),
+            "od": this.od.to(units).scalar.toNumber(),
             "wt": this.wt.to(units).scalar.toNumber(),
-            "icsa": this.icsa.to(units).scalar.toNumber()
+            "icsa": this.icsa.to(units + "^2").scalar.toNumber(),
+            "ecsa": this.ecsa.to(units + "^2").scalar.toNumber()
         };
     };
     return Pipe;

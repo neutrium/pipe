@@ -12,7 +12,7 @@ describe("General Schedule Pipe tests", function() {
 
 });
 
-describe("Testing DN 100mm Sch40 Pipe", function() {
+describe("Testing DN 100mm Sch 40 Pipe", function() {
 
     var pipe = new SchedulePipe("100mm", "40");
 
@@ -37,7 +37,7 @@ describe("Testing DN 100mm Sch40 Pipe", function() {
     });
 });
 
-describe("Testing NPS 4in Sch40 Pipe", function() {
+describe("Testing NPS 4in Sch 40 Pipe", function() {
 
     var pipe = new SchedulePipe("4in", "40");
 
@@ -61,4 +61,29 @@ describe("Testing NPS 4in Sch40 Pipe", function() {
         expect(pipe.ecsa.scalar.toSignificantDigits(10).toNumber()).toEqual(15.90431281);
     });
 
+});
+
+describe("Testing NPS 4inch Sch 40 Pipe raw(\"m\") output", function() {
+
+    var pipe = new SchedulePipe("4in", "40").raw("m");
+
+    it('Internal diameter correct ', function() {
+        expect(pipe.id).toEqual(0.1022604);
+    });
+
+	it('Outer diameter correct ', function() {
+        expect(pipe.od).toEqual(0.1143);
+    });
+
+	it('Wall thickness correct ', function() {
+        expect(pipe.wt).toEqual(0.0060198);
+    });
+
+	it('Internal cross sectional area correct ', function() {
+        expect(+pipe.icsa.toFixed(9)).toEqual(0.008213057);
+    });
+
+	it('External cross sectional area correct ', function() {
+        expect(+pipe.ecsa.toFixed(9)).toEqual(0.010260826);
+    });
 });

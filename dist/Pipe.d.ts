@@ -11,5 +11,6 @@ export declare class Pipe {
         "od": any;
         "wt": any;
         "icsa": any;
+        "ecsa": any;
     };
 }
