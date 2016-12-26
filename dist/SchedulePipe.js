@@ -6,8 +6,6 @@ var __extends = (this && this.__extends) || function (d, b) {
 };
 var Pipe_1 = require('./Pipe');
 var quantity_1 = require('@neutrium/quantity');
-var utilities_1 = require("@neutrium/utilities");
-var isNumber = utilities_1.typeguards.isNumber;
 var SchedulePipe = (function (_super) {
     __extends(SchedulePipe, _super);
     // @param {string} ns - The nominal size of the pipe (NPS vs DN ?)

@@ -1,8 +1,5 @@
 import { Pipe } from './Pipe'
 import { Quantity } from '@neutrium/quantity';
-import { typeguards } from "@neutrium/utilities";
-
-let isNumber = typeguards.isNumber;
 
 export class SchedulePipe extends Pipe
 {

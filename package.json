@@ -1,6 +1,6 @@
 {
   "name": "@neutrium/pipe",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "The pipe module of the Neutrium library",
   "main": "index.js",
   "scripts": {
