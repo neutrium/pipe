@@ -1,7 +1,11 @@
+//
+//	ASME/ANSI B36.10/19 Steel and Stainless Steel Pipe
+//
+
 import { Pipe } from './Pipe'
 import { Quantity } from '@neutrium/quantity';
 
-export class SchedulePipe extends Pipe
+export class ASME_B36_10_Pipe extends Pipe
 {
     // Schedule pipe outer diameter [<DN size>, <NPS size>, <OD in m>]
     static readonly OD_DATA = [[6, 1/8, 0.0103],[8, 1/4, 0.0137],[10, 3/8, 0.0171],[15, 1/2, 0.0213],[20, 3/4, 0.0267],[25, 1, 0.0334],[32, 1.25, 0.0422],[40, 1.5, 0.0483],[50, 2, 0.0603],[65, 2.5, 0.073],[80, 3, 0.0889],[90, 3.5, 0.1016],[100, 4, 0.1143],[115, 4.5, 0.127],[125, 5, 0.1413],[150, 6, 0.1683],[200, 8, 0.2191],[250, 10, 0.2731],[300, 12, 0.3239],[350, 14, 0.3556],[400, 16, 0.4064],[450, 18, 0.4572],[500, 20, 0.508],[550, 22, 0.5588],[600, 24, 0.6096],[650, 26, 0.6604],[700, 28, 0.7112],[750, 30, 0.762],[800, 32, 0.8128],[850, 34, 0.8636],[900, 36, 0.9144],[1050, 42, 1.0668]];
@@ -47,7 +51,6 @@ export class SchedulePipe extends Pipe
 
     // @param {string} ns - The nominal size of the pipe (NPS vs DN ?)
     // @param {string} schedule - The pipe schdule
-    // @param {boolean?} isImperial - Whether to use Imperial (NPS) or metric (DN) nominal size (Default false) - Could use a regex for DN or look for "
     constructor(size : string | Quantity, schedule : string)
     {
         let sizeQty = new Quantity(size),
@@ -70,9 +73,9 @@ export class SchedulePipe extends Pipe
 		}
 
         // Get the DN size and outer diameter
-        for (let i = 0, len = SchedulePipe.OD_DATA.length; i < len; i++)
+        for (let i = 0, len = ASME_B36_10_Pipe.OD_DATA.length; i < len; i++)
         {
-            let element = SchedulePipe.OD_DATA[i];
+            let element = ASME_B36_10_Pipe.OD_DATA[i];
 
             if(element[nomSizeIndex] == nomSize)
             {
@@ -89,7 +92,7 @@ export class SchedulePipe extends Pipe
         }
 
         // Get the wall thickness
-        let pipeData = SchedulePipe.WT_DATA["" + sizeData[0]];
+        let pipeData = ASME_B36_10_Pipe.WT_DATA["" + sizeData[0]];
 
         if(pipeData.hasOwnProperty(schedule))
         {

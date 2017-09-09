@@ -1,20 +1,20 @@
-var SchedulePipe = require('../dist/SchedulePipe').SchedulePipe;
+var ASME_B36_10_Pipe = require('../dist/ASME_B36_10_Pipe').ASME_B36_10_Pipe;
 
 describe("General Schedule Pipe tests", function() {
 
 	it('Invalid size throws error ', function() {
-        expect(function() { new SchedulePipe("42mm", "20")}).toThrow(new Error("Invalid pipe size provided"));
+        expect(function() { new ASME_B36_10_Pipe("42mm", "20")}).toThrow(new Error("Invalid pipe size provided"));
     });
 
 	it('Invalid size and schedule combo throws error ', function() {
-        expect(function() { new SchedulePipe("100mm", "20")}).toThrow(new Error("Invalid combination of pipe size and schedule provided"));
+        expect(function() { new ASME_B36_10_Pipe("100mm", "20")}).toThrow(new Error("Invalid combination of pipe size and schedule provided"));
     });
 
 });
 
 describe("Testing DN 100mm Sch 40 Pipe", function() {
 
-    var pipe = new SchedulePipe("100mm", "40");
+    var pipe = new ASME_B36_10_Pipe("100mm", "40");
 
     it('Internal diameter correct ', function() {
         expect(pipe.id.scalar.toNumber()).toEqual(102.2604);
@@ -39,7 +39,7 @@ describe("Testing DN 100mm Sch 40 Pipe", function() {
 
 describe("Testing NPS 4in Sch 40 Pipe", function() {
 
-    var pipe = new SchedulePipe("4in", "40");
+    var pipe = new ASME_B36_10_Pipe("4in", "40");
 
     it('Internal diameter correct ', function() {
         expect(pipe.id.scalar.toNumber()).toEqual(4.026);
@@ -65,7 +65,7 @@ describe("Testing NPS 4in Sch 40 Pipe", function() {
 
 describe("Testing NPS 4inch Sch 40 Pipe raw(\"m\") output", function() {
 
-    var pipe = new SchedulePipe("4in", "40").raw("m");
+    var pipe = new ASME_B36_10_Pipe("4in", "40").raw("m");
 
     it('Internal diameter correct ', function() {
         expect(pipe.id).toEqual(0.1022604);

@@ -29,8 +29,6 @@ export class Pipe
     {
 		let units = unit || this.od.units();
 
-		console.log(this.ecsa.scalar.valueOf());
-
         return {
             "id": this.id.to(units).scalar.toNumber(),
             "od": this.od.to(units).scalar.toNumber(),

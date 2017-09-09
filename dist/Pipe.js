@@ -1,8 +1,9 @@
 "use strict";
-var quantity_1 = require('@neutrium/quantity');
+Object.defineProperty(exports, "__esModule", { value: true });
+var quantity_1 = require("@neutrium/quantity");
 // Should this be an interface or a superclass -> could mean move utilities back into here (probably better to be an abstract class)
 // Maybe not even make it abstract and use it as the general user defined pipe and the subclasses allow constructors with specific pipe parameters like DN and Sch
-var Pipe = (function () {
+var Pipe = /** @class */ (function () {
     // @param {number | Quantity} od - The outer diameter
     // @param {number | Quantity} wt - The pipe wall thickness
     function Pipe(od, wt) {
@@ -15,7 +16,6 @@ var Pipe = (function () {
     }
     Pipe.prototype.raw = function (unit) {
         var units = unit || this.od.units();
-        console.log(this.ecsa.scalar.valueOf());
         return {
             "id": this.id.to(units).scalar.toNumber(),
             "od": this.od.to(units).scalar.toNumber(),
