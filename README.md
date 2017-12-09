@@ -9,7 +9,7 @@ The pipe module of the [Neutrium](https://neutrium.net) engineering library.
 Version 2 of this library saw the additon of the ASTM B88 standard and several breaking changes regarding naming conventions:
 
 - The `SchedulePipe` object has been renamed to `ASME_B36_10_Pipe`.
--
+- The `PEPipe` object has been renamed to `ISO_11922_Pipe`.
 
 ## Getting Started
 
@@ -114,11 +114,11 @@ Once a schedule pipe has been created you can use it as you would a general pipe
 
 The `ISO_11922_Pipe` class is a subclass of the general pipe, it can be created by providing a suitable outer diameter and PN grade:
 
-	let pipe = new PEPipe("25mm", "6");
+	let pipe = new ISO_11922_Pipe("25mm", "6");
 
 You can also optionally supply the the compound type PE80 or PE100 (default):
 
-	let pipe = new PEPipe("200mm", "10", "PE80");
+	let pipe = new ISO_11922_Pipe("200mm", "10", "PE80");
 
 If you attempt to create a PE pipe with a invalid size and PN rating combination an [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) will be thrown.
 
