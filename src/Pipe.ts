@@ -1,8 +1,5 @@
 import { Quantity } from '@neutrium/quantity'
 
-
-// Should this be an interface or a superclass -> could mean move utilities back into here (probably better to be an abstract class)
-// Maybe not even make it abstract and use it as the general user defined pipe and the subclasses allow constructors with specific pipe parameters like DN and Sch
 export class Pipe
 {
     // Make these private and have external getters
