@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Explore Neutrium pipe catalogues, dimensions and unit-aware geometry calculations.">
+<meta name="theme-color" content="#426094"><title>Pipe Explorer · @neutrium/pipe</title>
+<link rel="icon" href="./assets/neutrium-logo.png"><link rel="stylesheet" href="./styles.css"><script type="module" src="./app.ts"></script>
+</head>
+<body>
+<a class="skip-link" href="#lab">Skip to pipe explorer</a>
+<header class="topbar"><a class="brand" href="../"><span class="brand-mark"><img src="./assets/neutrium-logo.png" alt=""></span><span>@neutrium/pipe</span></a><nav class="topnav" aria-label="Primary navigation"><a href="../">API reference</a><a href="https://github.com/neutrium/pipe">GitHub</a></nav></header>
+<main id="lab" class="page">
+<section class="intro"><div><p class="eyebrow">Interactive pipe demo</p><h1>Every dimension.<br>Connected.</h1></div><p class="intro-copy">Explore standard pipe and tube sizes. Inspect the bore, change units and calculate geometry with the same library you use in your code.</p></section>
+<div class="presets" aria-label="Pipe examples"><button class="preset-chip" data-preset="steel">Steel · DN 100</button><button class="preset-chip" data-preset="copper">Copper · 1 inch</button><button class="preset-chip" data-preset="pe">Polyethylene · 110 mm</button><button class="preset-chip" data-preset="custom">Custom geometry</button></div>
+<div class="workspace-grid">
+<section class="panel calculator-panel" aria-labelledby="selection-title"><div class="panel-heading"><h2 id="selection-title">01 / Select a pipe</h2><div class="live-badge"><span></span>Live</div></div>
+<form id="pipe-form"><div class="pipe-fields">
+<label class="field wide"><span>Standard</span><select id="standard"><option value="steel">ASME B36.10 · Steel pipe</option><option value="copper">ASTM B88 · Copper tube</option><option value="metric">ASTM B88M · Metric copper tube</option><option value="pe">ISO 11922 · Polyethylene pipe</option><option value="bwg">BWG · Gauge tube</option><option value="custom">Custom pipe</option></select></label>
+<label class="field" id="system-field"><span>Sizing system</span><select id="system"><option>DN</option><option>NPS</option></select></label>
+<label class="field" id="compound-field" hidden><span>Compound</span><select id="compound"><option>PE100</option><option>PE80</option></select></label>
+<label class="field" id="size-field"><span id="size-label">Nominal size</span><select id="size"></select></label>
+<label class="field" id="designation-field"><span id="designation-label">Schedule</span><select id="designation"></select></label>
+<label class="field" id="od-field" hidden><span>Outer diameter</span><input id="od" value="100mm" type="text" spellcheck="false"></label>
+<label class="field" id="wall-field" hidden><span>Wall thickness</span><input id="wall" value="6mm" type="text" spellcheck="false"></label>
+<label class="field"><span>Output units</span><select id="units"><option value="mm">Metric · mm</option><option value="in">Imperial · in</option></select></label>
+</div><p class="field-help">Nominal sizes are catalogue designations; actual diameters can differ. Available options come directly from the library.</p>
+<div class="pipe-fields segment"><label class="field"><span>Segment length</span><input id="length" type="text" value="6m" spellcheck="false"></label><label class="field"><span>Material density</span><input id="density" type="text" value="7850kg/m^3" spellcheck="false"></label></div>
+<p class="field-help">Lengths and densities accept explicit units. Density is an editable example, not a catalogue material property.</p></form>
+<p id="error" class="error-message" role="alert" hidden></p>
+<div id="results"><div class="geometry"><figure><svg viewBox="0 0 320 300" role="img" aria-labelledby="diagram-title"><title id="diagram-title">Pipe cross-section, drawn to scale</title><defs><pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="7" height="7" fill="#d6e1ef"/><path d="M0 0V7" stroke="#8da3c2" stroke-width="2"/></pattern></defs><circle cx="160" cy="140" r="112" fill="url(#hatch)" stroke="#426094" stroke-width="2"/><circle id="bore" cx="160" cy="140" r="98" fill="#f9fbfd" stroke="#426094" stroke-width="2"/><path d="M48 263H272M48 256V270M272 256V270" stroke="#426094"/><text id="diameter-caption" x="160" y="289" text-anchor="middle" fill="#314b78" font-size="13"></text></svg><figcaption>Cross-section · relative proportions</figcaption></figure><dl id="dimensions"></dl></div><div class="metrics" id="metrics" aria-live="polite"></div></div>
+</section>
+<aside class="panel code-panel"><div class="panel-heading"><h2>02 / Use it</h2><button id="copy-code" class="copy-button" type="button">Copy code</button></div><pre><code id="code-output"></code></pre><p id="copy-status" role="status" class="field-help"></p><div class="install-block"><span>Install</span><code>npm install @neutrium/pipe</code></div><div class="feature-list"><div><span>01</span><p><strong>Catalogue driven</strong>Discover supported sizes and designations.</p></div><div><span>02</span><p><strong>Unit aware</strong>Convert dimensions without manual factors.</p></div><div><span>03</span><p><strong>Reusable definitions</strong>Build components from immutable geometry.</p></div></div></aside>
+</div></main><footer class="footnote"><p>Built from the current <code>@neutrium/pipe</code> source. Nominal catalogue geometry; excludes manufacturing tolerances.</p><a href="../">Explore the Pipe API →</a></footer>
+</body></html>

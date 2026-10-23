@@ -1,0 +1,40 @@
+{
+	"$schema": "https://typedoc.org/schema.json",
+	"entryPoints": [
+		"./src/index.ts",
+		"./src/pipes/index.ts",
+		"./src/connections/index.ts",
+		"./src/components/index.ts",
+		"./src/fittings/index.ts",
+		"./src/valves/index.ts",
+		"./src/validation.ts",
+		"./src/errors.ts"
+	],
+	"tsconfig": "./tsconfig.json",
+	"out": "./docs",
+	"name": "@neutrium/pipe",
+	"includeVersion": true,
+	"readme": "./README.md",
+	"projectDocuments": [
+		"./guides/migrating-v3.md",
+		"./guides/migrating-v2.md",
+		"./guides/catalogue-data.md",
+		"./guides/development.md"
+	],
+	"excludeInternal": true,
+	"excludePrivate": true,
+	"excludeProtected": true,
+	"intentionallyNotExported": [
+		"NamedPorts"
+	],
+	"validation": {
+		"invalidLink": true
+	},
+	"treatWarningsAsErrors": true,
+	"cleanOutputDir": true,
+	"navigationLinks": {
+		"Interactive demo": "https://neutrium.github.io/pipe/demo/",
+		"GitHub": "https://github.com/neutrium/pipe",
+		"Neutrium": "https://neutrium.net"
+	}
+}

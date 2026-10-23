@@ -1,34 +1,96 @@
 {
-  "name": "@neutrium/pipe",
-  "version": "2.0.1",
-  "description": "The pipe module of the Neutrium library",
-  "main": "dist/index.js",
-  "scripts": {
-    "clean": "rm -r ./dist/*",
-    "tsc": "tsc",
-    "build": "npm run tsc",
-    "prepublish": "npm run clean && npm run build",
-    "test": "jasmine"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/neutrium/pipe.git"
-  },
-  "keywords": [
-    "neutrium",
-    "pipe",
-    "hydraulics"
-  ],
-  "author:": "Trevor Walker <trevorw@neutrium.net> (https://neutrium.net)",
-  "license": "CC-BY-4.0",
-  "bugs": {
-    "url": "https://github.com/neutrium/pipe/issues"
-  },
-  "homepage": "https://github.com/neutrium/pipe#readme",
-  "dependencies": {
-    "@neutrium/quantity": "^3.0.4"
-  },
-  "devDependencies": {
-    "jasmine": "^2.8.0"
-  }
+	"name": "@neutrium/pipe",
+	"version": "3.0.0",
+	"description": "The pipe module of the Neutrium library",
+	"type": "module",
+	"sideEffects": false,
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"default": "./dist/index.js"
+		},
+		"./pipes": {
+			"types": "./dist/pipes/index.d.ts",
+			"default": "./dist/pipes/index.js"
+		},
+		"./connections": {
+			"types": "./dist/connections/index.d.ts",
+			"default": "./dist/connections/index.js"
+		},
+		"./components": {
+			"types": "./dist/components/index.d.ts",
+			"default": "./dist/components/index.js"
+		},
+		"./fittings": {
+			"types": "./dist/fittings/index.d.ts",
+			"default": "./dist/fittings/index.js"
+		},
+		"./valves": {
+			"types": "./dist/valves/index.d.ts",
+			"default": "./dist/valves/index.js"
+		},
+		"./validation": {
+			"types": "./dist/validation.d.ts",
+			"default": "./dist/validation.js"
+		},
+		"./errors": {
+			"types": "./dist/errors.d.ts",
+			"default": "./dist/errors.js"
+		},
+		"./package.json": "./package.json"
+	},
+	"engines": {
+		"node": ">=24.0.0"
+	},
+	"scripts": {
+		"clean": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true });\"",
+		"docs:install": "npm ci --prefix tools/typedoc",
+		"docs": "node tools/typedoc/node_modules/typedoc/bin/typedoc",
+		"docs:check": "npm run docs -- --emit none",
+		"build": "npm run clean && tsc",
+		"test": "npm run build && tsc -p tsconfig.type-tests.json && vitest run && node scripts/test-package.mjs",
+		"benchmark": "npm run build && node --expose-gc benchmarks/construction.mjs",
+		"prepack": "npm run build",
+		"prepublishOnly": "npm test",
+		"demo": "vite demo --host 127.0.0.1 --port 4173 --strictPort --base /demo/",
+		"docs:demo": "tsc -p demo/tsconfig.json && vite build demo --base ./ --outDir ../docs/demo --emptyOutDir"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/neutrium/pipe.git"
+	},
+	"keywords": [
+		"neutrium",
+		"pipe",
+		"hydraulics"
+	],
+	"author": "Trevor Walker <trevorw@neutrium.net> (https://neutrium.net)",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/neutrium/pipe/issues"
+	},
+	"homepage": "https://neutrium.github.io/pipe/",
+	"dependencies": {
+		"@neutrium/decimal": "^2.3.0",
+		"@neutrium/quantity": "^6.0.0"
+	},
+	"devDependencies": {
+		"typescript": "^7.0.2",
+		"vite": "^8.3.5",
+		"vitest": "^5.0.5"
+	},
+	"files": [
+		"dist",
+		"src/**/*.ts",
+		"README.md",
+		"guides/*.md",
+		"benchmarks/README.md",
+		"LICENCE"
+	],
+	"publishConfig": {
+		"access": "public",
+		"registry": "https://registry.npmjs.org/"
+	}
 }

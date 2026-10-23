@@ -1,166 +1,302 @@
 # Neutrium.pipe
 
-The pipe module of the [Neutrium](https://neutrium.net) engineering library.
+Create pipe, tube, fitting, and valve definitions for engineering applications. Calculate geometry with units, select dimensions from standard catalogues, and share physical component definitions across your piping model.
 
-## Breaking Changes
+[API reference](https://neutrium.github.io/pipe/) · [Interactive demo](https://neutrium.github.io/pipe/demo/)
 
-### Version 2.*
+## Getting started
 
-Version 2 of this library saw the additon of the ASTM B88 standard and several breaking changes regarding naming conventions:
+Requires Node.js 24 or newer. The package uses ES modules and includes TypeScript
+declarations. Browser applications need a bundler that resolves npm dependencies.
 
-- The `SchedulePipe` object has been renamed to `ASME_B36_10_Pipe`.
-- The `PEPipe` object has been renamed to `ISO_11922_Pipe`.
+```sh
+npm install @neutrium/pipe
+```
+Then:
 
-## Getting Started
+```ts
+import { Pipe } from '@neutrium/pipe';
 
-### Installing
+const pipe = new Pipe('100mm', '6mm'); // Outer diameter and wall thickness
 
-You can install NeutriumJS.Pipe using npm.
+console.log(pipe.internalDiameter.to('mm').scalar.toNumber()); // 88
+console.log(pipe.internalVolume('2m').to('L').scalar.toNumber()); // About 12.16
+console.log(pipe.mass('2m', '7850kg/m3').to('kg').scalar.toNumber()); // About 27.82
+```
 
-	npm install @neutrium/pipe --save
+Dimensions accept strings with units or `Quantity` objects from `@neutrium/quantity`. Results are  Quantities, so you can convert units with `to()` and extract a JavaScript number with `scalar.toNumber()`.
 
-### Including
+## Using a pipe or tube
 
-#### Typescript
+```ts
+import {
+    ASME_B36_10_Pipe,
+    ASTM_B88_Tube,
+    ASTM_B88M_Tube,
+    ISO_11922_Pipe,
+    BWG_Tube,
+} from '@neutrium/pipe/pipes';
 
-You can include the NeutriumJS.Quantity module using an import statement in typescript:
+const steel = ASME_B36_10_Pipe.fromDN(100, '40');
+const sameSteel = ASME_B36_10_Pipe.fromNPS(4, '40');
+const copper = new ASTM_B88_Tube('1in', 'K');
+const metricCopper = new ASTM_B88M_Tube('22mm', 'A');
+const polyethylene = new ISO_11922_Pipe('200mm', '10', 'PE80');
+const gaugeTube = new BWG_Tube('1in', '16');
+```
 
-    import { Pipe } from "@neutrium/pipe"
+| Class | Selection | Additional properties |
+| --- | --- | --- |
+| `ASME_B36_10_Pipe` | DN or NPS designation and schedule | `dn`, `nps`, `schedule`, `nominalSize` |
+| `ASTM_B88_Tube` | Nominal inch size and type `K`, `L`, or `M` | `type`, `nominalSize` |
+| `ASTM_B88M_Tube` | Metric designation and type `A`, `B`, or `C` | `type`, `nominalSize` |
+| `ISO_11922_Pipe` | Metric size, pressure rating string, and compound (`PE100` by default) | `pressureRating`, `compound`, `standardDimensionRatio`, `nominalSize` |
+| `BWG_Tube` | Actual outer diameter and gauge string | `gauge` |
 
-    let pipe = new Pipe();
+Nominal sizes are designations, not measured diameters: DN100 and NPS4 identify the same steel pipe. Prefer `fromDN()` and `fromNPS()` to make that choice explicit. They return dimensions in millimetres and inches respectively.
 
-This module is built with the declaration files so type hinting should work once the module has been imported.
+Select an exact supported designation; catalogue constructors reject unsupported sizes and combinations. Schedules accept strings or numbers, such as `'40'` or `40`. Pressure ratings and gauges use strings, such as `'10'` and `'16'`.
 
-#### Node
+The PE wall table covers AS/NZS 4130 Series 1 dimensions under the historical class name `ISO_11922_Pipe`. Catalogue availability describes the bundled data, not manufacturer stock or certification. See the [catalogue data guide](guides/catalogue-data.md) for reference sources and verification coverage.
 
-    var Pipe = require("@neutrium/pipe");
+## Working with geometry
 
-#### Browsers
+All pipe and tube classes expose the same geometry:
 
-The Pipe module is currently a commonjs (node) package. To use it in a browser environment you will need to use a tool like [browserify](http://browserify.org) to convert it to a web bundle and expose the Pipe object.
+| Property | Meaning |
+| --- | --- |
+| `outerDiameter` | Actual outside diameter |
+| `internalDiameter` | Bore diameter |
+| `wallThickness` | Pipe wall thickness |
+| `internalCrossSectionalArea` | Bore area |
+| `externalCrossSectionalArea` | Area enclosed by the outer diameter |
+| `materialCrossSectionalArea` | Pipe wall area, excluding the bore |
 
-## Usage
+Outer diameter and wall thickness retain their supplied units. Calculated internal diameter and areas use the outer diameter's units. Mixed input units are supported.
 
-### General Pipe
+```ts
+import { Pipe } from '@neutrium/pipe';
+import { Quantity } from '@neutrium/quantity';
+
+const pipe = new Pipe('100mm', new Quantity('0.6cm'));
 
-#### Creation
+pipe.internalDiameter.to('in');
+pipe.materialCrossSectionalArea.to('cm2');
+pipe.internalVolume('2m').to('L');
+pipe.materialVolume('2m').to('m3');
+pipe.internalSurfaceArea('2m').to('m2');
+pipe.externalSurfaceArea('2m').to('m2');
+pipe.mass('2m', '7850kg/m3').to('kg');
+```
 
-You can create a general pipe object by specifying an outer diameter and wall thickness as [@neutrium/quantity](https://github.com/neutrium/quantity) objects :
+Pipe diameters and wall thickness must be finite, positive lengths, with wall thickness less than half the outer diameter. Segment lengths may be zero; material density must be finite and positive, with mass-per-volume units. Surface areas exclude end faces. Mass includes the pipe wall only.
 
-	// Pipe(<outer diameter>, <wall thickness>)
-	let pipe = new Pipe(new Quantity("100mm"), new Quantity("6mm"));
+### Numeric snapshots
 
-Alternatively you can specify the outer diameter and wall thickness using strings that will be converted to Quantity objects internally:
+Use `raw(unit)` when passing geometry to calculations that use ordinary JavaScript numbers. Lengths use the requested unit; areas use its square. Omitting the unit uses the outer diameter's units.
 
-	let pipe = new Pipe("100mm", "6mm");
+```ts
+const geometry = pipe.raw('m');
 
-The pipe object will maintain unit consistency and where applicable will return all attributes in the units used to specify outer diameter.
+geometry.internalDiameter; // 0.088
+geometry.outerDiameter;    // 0.1
+geometry.wallThickness;    // 0.006
+geometry.internalCrossSectionalArea; // m²
+```
 
-#### Usage
+The snapshot contains all six geometry properties and is detached from the pipe. Editing it does not change the original definition.
 
-Once the pipe object has been created you can access its attributes directly:
+## Finding catalogue sizes
 
-	pipe.od 	// The pipe outer diameter
-	pipe.id 	// The pipe inner diameter
-	pipe.wt 	// The pipe wall thickness
-	pipe.icsa 	// The pipe internal cross sectional area
-	pipe.ecsa 	// The pipe external cross sectional area
+Use `available*()` methods to populate size and grade selectors:
 
-Each of these attributes are Quantity objects and can be readily converted to a desired unit using the `to()` method, by default each quantity will have the units specified for od in the constructor with the exception of wt. No special checking is performed to ensure unit consistency and therefore od and wall thickness could be returned in different units at the users digression.
+```ts
+import {
+    ASME_B36_10_Pipe,
+    ASTM_B88_Tube,
+    ISO_11922_Pipe,
+    BWG_Tube,
+} from '@neutrium/pipe/pipes';
 
-The underlying scalar value of the quantity can be accessed using the `scalar` property (e.g. `pipe.od.scalar`) which returns a [@neutrium/math](https://github.com/neutrium/math) Decimal or as a plain old javascript numbers using `pipe.od.scalar.toNumber()`.
+ASME_B36_10_Pipe.availableSizes('NPS', '40');
+ASME_B36_10_Pipe.availableSchedules(100, 'DN');
+ASTM_B88_Tube.availableTypes(0.25);
+ISO_11922_Pipe.availablePressureRatings(200, 'PE80');
+BWG_Tube.availableGauges('1in');
+```
 
-While the big number implmentation of the Neutrium Decimal provides superior accuracy it has performance penalties. Therefore where maximum performance is required (i.e. for iterative hydraulic calculations) it is recommended to utilise the plain javascript object returned from the `raw()` method:
+Each catalogue class also provides `find(options)`. Results are pipe instances ordered by internal diameter, smallest first. `minimumInternalDiameter` is an inclusive lower bound; omit it to find all combinations matching the other filters.
 
-	let raw = pipe.raw();
+```ts
+const candidates = ASME_B36_10_Pipe.find({
+    schedule: '40',
+    minimumInternalDiameter: '100mm',
+});
 
-You can also specify the unit you want the attributes to be returned as (otherwise the units used for od will be used):
+const smallest = candidates[0];
+if (smallest) {
+    console.log(smallest.dn, smallest.internalDiameter.to('mm').scalar.toNumber());
+}
+
+const polyethylene = ISO_11922_Pipe.find({
+    compound: 'PE80',
+    pressureRating: '10',
+    minimumInternalDiameter: '150mm',
+});
+```
 
-	let raw = pipe.raw("m");
+Well-formed filters with no matches return `[]`. Malformed filters or incompatible units throw a structured error. Use the [API reference](https://neutrium.github.io/pipe/) for each catalogue's search options and discovery methods.
+
+## Fittings, valves, and connections
 
-The object returned from the raw method has the following structure with each attribute being a javascript number:
+A component describes physical equipment with a `kind` and named `ports`. Use `Port` for a connection, or `Port.fromPipe()` to copy a pipe's actual dimensions. Pass a nominal designation explicitly when you want to retain it.
 
-	raw = {
-		id: number,
-		od: number,
-		wt: number,
-		icsa: number
-	}
+```ts
+import { ASME_B36_10_Pipe } from '@neutrium/pipe/pipes';
+import { Port } from '@neutrium/pipe/connections';
+import { Elbow, Tee, Reducer } from '@neutrium/pipe/fittings';
+import { Valve } from '@neutrium/pipe/valves';
 
-### NPS/DN Schedule Pipe (ASME/ANSI B36.10/19)
+const pipe = ASME_B36_10_Pipe.fromDN(100, '40');
+const connection = Port.fromPipe(pipe, {
+    nominalSize: pipe.nominalSize,
+    connection: 'flanged',
+});
+const branch = new Port({ internalDiameter: '50mm' });
 
-#### Creation
+const elbow = new Elbow({ port: connection, angle: 90, bendRadius: '150mm' });
+const tee = new Tee({ run: connection, branch });
+const reducer = new Reducer({ inlet: connection, outlet: branch, style: 'concentric' });
+const valve = new Valve({ valveType: 'ball', inlet: connection, boreDiameter: '80mm' });
 
-A Schedule pipe object is a subclass of the general pipe and can be created by providing the size (sting | Quantity) and the schedule (string):
+console.log(elbow.ports.inlet.internalDiameter);
+```
 
-	let pipe1 = ASME_B36_10_Pipe(new Quantity("100mm"), "40");
-	let pipe2 = ASME_B36_10_Pipe("4in", "40");
+| Definition | Ports | Options |
+| --- | --- | --- |
+| `Elbow` | `inlet`, `outlet` | Angle in degrees (default 90), optional centreline bend radius |
+| `Tee` | `run1`, `run2`, `branch` | Branch angle in degrees (default 90); branch defaults to the run port |
+| `Reducer` | `inlet`, `outlet` | `concentric` or `eccentric` style, optional length; port bores must differ |
+| `Valve` | `inlet`, `outlet` | Valve type, optional bore diameter and face-to-face length; outlet defaults to inlet |
 
-The units of the pipe size will dictate whether NPS or DN nominal size is used for lookup. If the nominal size is provided in inches NPS nominal size will be used, for all other units the size will be converted to mm and DN nominal size will be used. This is an important distinction as schedule pipe nominal size is not an exact conversion. For example 4" NPS is equivalent to DN 100mm pipe, not 101.6mm as one would expect from a direct conversion.
+Connection and valve type identifiers are open strings. Unspecified dimensions remain undefined. Nominal sizes and connection labels alone do not establish mechanical compatibility.
 
-If you attempt to create a schedule pipe with a invalid size and schedule combination an [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) will be thrown.
+### Pipe definitions and component adapters
 
-#### Usage
+Use `PipeComponent` to expose a pipe through the same inlet/outlet interface as fittings and valves:
 
-Once a schedule pipe has been created you can use it as you would a general pipe object, however the schedule pipe has some additional information:
+```ts
+import { Pipe, PipeComponent } from '@neutrium/pipe/pipes';
 
-	pipe.schedule 		// The pipe schedule
-	pipe.dn 			// The DN nominal size (millimeters)
-	pipe.nps 			// The NPS nominal size (inches)
+const component = new PipeComponent(new Pipe('100mm', '5mm'));
 
-### Polyethylene Pipe (ISO 11922 & AS/NZS4130)
+component.ports.inlet.internalDiameter;
+component.pipe.internalCrossSectionalArea;
+```
 
-#### Creation
+Custom geometry can implement `PipeDefinition`, whose six geometry fields are readonly Quantities. Consumers can accept `ComponentDefinition` for equipment with a `kind` and named ports, without requiring inheritance from a library class.
 
-The `ISO_11922_Pipe` class is a subclass of the general pipe, it can be created by providing a suitable outer diameter and PN grade:
+### Creating custom components
 
-	let pipe = new ISO_11922_Pipe("25mm", "6");
+Extend `TwoPortComponent` for inline equipment or `Component<YourPortMap>` for other port arrangements. Use the public validation helpers for custom dimensions.
 
-You can also optionally supply the the compound type PE80 or PE100 (default):
+```ts
+import { Quantity } from '@neutrium/quantity';
+import { TwoPortComponent } from '@neutrium/pipe/components';
+import type { PortDefinition } from '@neutrium/pipe/connections';
+import { positiveLength } from '@neutrium/pipe/validation';
 
-	let pipe = new ISO_11922_Pipe("200mm", "10", "PE80");
+class Strainer extends TwoPortComponent {
+    readonly meshSize: Quantity;
 
-If you attempt to create a PE pipe with a invalid size and PN rating combination an [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) will be thrown.
+    constructor(port: PortDefinition, meshSize: string | Quantity) {
+        const validatedMeshSize = positiveLength(meshSize, 'meshSize', 'Mesh size');
+        super({ kind: 'strainer', inlet: port });
+        this.meshSize = validatedMeshSize;
+    }
+}
+```
 
-#### Usage
+Validate custom options before calling `super()`, because successful component construction freezes the supplied port definitions. Custom subclasses are responsible for protecting their own additional fields.
 
-Once a ISO_11922_Pipe object has been created you can use it as you would a general pipe object, however the PE pipe has some additional properties:
+## Handling invalid input
 
-	pipe.pn 		// The nominal working pressure of the pipe/PN rating (in bar)
-	pipe.compound	// The material used for the pipe (either PE80 or PE100)
-	pipe.sdr		// The standard dimension ratio of the pipe
+Use `isPipeError()` to recognise library validation errors and inspect `code`, `field`, `value`, and `allowedValues`. Parser failures also retain `cause`.
 
-### Seamless Copper Water Tube (ASTM B88)
+```ts
+import { ASME_B36_10_Pipe, isPipeError } from '@neutrium/pipe';
 
-#### Creation
+try {
+    ASME_B36_10_Pipe.fromDN(100, 'unknown');
+} catch (error: unknown) {
+    if (isPipeError(error)) {
+        console.log(error.code, error.field);
+        console.log(error.allowedValues);
+    } else {
+        throw error;
+    }
+}
+```
 
-Due to variations in nominal diameter and wall thickness specified in the imperial (ASTM B88) and metric (ASTM B88M) versions of ASTM B88 standard, seamless copper tube can be created by providing a suitable nominal diameter and type (K, L & M for B88 and A, B, C for B88M) for the respective standard:
+| Error | Meaning |
+| --- | --- |
+| `PipeTypeError` | Wrong input type, malformed value, or incompatible units |
+| `PipeRangeError` | Non-finite or out-of-range number, or impossible geometry |
+| `PipeError` | Well-formed but unsupported selection |
 
-	// ASTM B88 - Imperial standard
-	let tube1 = new ASTM_B88_Tube("1in", "K");
-	// ASTM B88M - Metric version
-	let tube2 = new ASTM_B88M_Tube("22mm", "A");
+Optional defaults apply to omitted values or `undefined`; `null` is rejected.
+Use error codes and fields for programmatic handling instead of matching messages.
 
-If you attempt to create a ASTM B88 tube with an invalid size and/or type an [Error](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error) will be thrown.
+### Public validation helpers
 
-#### Usage
+Import `positiveLength`, `nonNegativeLength`, `finiteNumber`, `lengthQuantity`, and `densityQuantity` from `@neutrium/pipe/validation` for custom components. Length and density helpers parse strings or Quantities; `finiteNumber` checks a JavaScript number without coercion. The helpers throw the same structured errors as the built-in classes.
 
-Once a ASTM_B88(M)_Tube object has been created you can use it as you would a general pipe object, however the ASTM_B88(M)_Tube pipe has some additional properties:
+## Public entry points
 
-	pipe.type 		// The ASTM B88/B88M type of the tube
-	pipe.nps		// The nominal size of the tube (reported in units consistent with corresponding standard)
+Import from `@neutrium/pipe` for the complete API, or choose a focused feature path:
 
-## Donations
+| Entry point | Use |
+| --- | --- |
+| `@neutrium/pipe/pipes` | Pipe and tube classes, catalogue searches, `PipeComponent`, `PipeDefinition`, `RawPipe` |
+| `@neutrium/pipe/connections` | `Port`, connection options, `PortDefinition`, `NominalSize` |
+| `@neutrium/pipe/components` | Component base classes, component contracts, metadata types |
+| `@neutrium/pipe/fittings` | `Elbow`, `Tee`, `Reducer`, and their options |
+| `@neutrium/pipe/valves` | `Valve` and its options |
+| `@neutrium/pipe/validation` | Dimension and number validation helpers |
+| `@neutrium/pipe/errors` | Error classes, error types, and `isPipeError` |
 
-NeutriumJS is free software, but you can support the developers by [donating here](https://neutrium.net/donate/).
+Import types from their owning feature path or the root:
 
-## Release Notes
+```ts
+import { Valve, type ValveOptions } from '@neutrium/pipe/valves';
+import type { PortDefinition } from '@neutrium/pipe/connections';
+```
 
-| Version | Notes |
-|:-------:|:------|
-| 1.0.0	  | Initial Release |
-| 2.0.0	  | Addition of ASTM B88 and revision of API |
+## Guides and reference
+
+- [API reference](https://neutrium.github.io/pipe/): constructors, properties, options, and types.
+- [Interactive demo](https://neutrium.github.io/pipe/demo/): explore catalogue dimensions and geometry.
+- [Catalogue data](guides/catalogue-data.md): dimensional sources and verification coverage.
+- [Migrating to version 3](guides/migrating-v3.md).
+- [Migrating to version 2](guides/migrating-v2.md).
+- [Development and releases](guides/development.md): tests, benchmarks, documentation builds, and publishing.
 
 ## License
 
-[Creative Commons Attribution 4.0 International](http://creativecommons.org/licenses/by/4.0/legalcode)
+## Overview
+
+This project is licensed under the MIT License, see the [LICENCE](./LICENCE) file for details.
+
+You are free to:
+
+- Use this plugin for personal or commercial purposes
+- Modify and distribute the code
+- Include it in other projects
+
+Under the following conditions:
+
+- You must include the original license and copyright notice
+
+### Disclaimer
+
+This library is provided "as is", without warranty of any kind. Use at your own risk.
